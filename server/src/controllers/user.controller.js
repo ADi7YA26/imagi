@@ -3,8 +3,7 @@ import { User } from "../models/user.model.js"
 export const createUser = async (user) => {
   try {
     const newUser = await User.create(user)
-    await newUser.save()
-    res.status(201).json(newUser)
+    return JSON.parse(JSON.stringify(newUser));
   } catch (err) {
     next(err)
   }
@@ -31,7 +30,7 @@ export const updateUser = async (clerkId, user) => {
 
     if (!updatedUser) throw new Error("User update failed");
 
-    res.status(200).json(updateUser)
+    return JSON.parse(JSON.stringify(updatedUser));
   } catch (err) {
     next(err)
   }
@@ -48,7 +47,7 @@ export const deleteUser = async (clerkId) => {
 
     const deletedUser = await User.findByIdAndDelete(userToDelete._id);
 
-    res.status(200).json("User has been deleted.")
+    return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null;
   }catch{
     next(err)
   }

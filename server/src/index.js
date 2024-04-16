@@ -3,6 +3,8 @@ import cors from "cors"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
 
+import webhookRoute from "./routes/webhooks.routes.js"
+
 const app = express()
 
 dotenv.config({
@@ -11,7 +13,7 @@ dotenv.config({
 
 const connectDB = (url) => {
   mongoose.set("strictQuery", true);
-
+  
   mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => console.log("Database connected"))
@@ -19,18 +21,27 @@ const connectDB = (url) => {
 };
 
 
+// middlewares 
 app.use(cors({
   origin: process.env.CORS_ORIGIN,
   credentials: true
 }))
-
 app.use(express.json({limit: "16kb"}))
 
 
-app.get('/', (req, res) => {
-  res.send('ok')
-})
 
+app.use("/api/webhooks", webhookRoute)
+
+
+app.use((err, req, res, next)=>{
+  const errorStatus = err.status || 500;
+  const errorMessage = err.message || "Something went wrong";
+  return res.status(errorStatus).json({
+    success: false,
+    status: err.status,
+    error: errorMessage
+  })
+})
 
 app.listen(process.env.PORT || 8000, () => {
   connectDB()

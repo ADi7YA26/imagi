@@ -64,7 +64,7 @@ export const updateCredits = async (req, res, next) => {
 
     if(!updatedUserCredits) throw new Error("User credits update failed");
 
-    return JSON.parse(JSON.stringify(updatedUserCredits));
+    res.status(200).json(updateCredits)
   } catch (err) {
     next(err);
   }

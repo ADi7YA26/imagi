@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import mongoose from "mongoose"
 
 import webhookRoute from "./routes/webhooks.routes.js"
+import userRoute from "./routes/user.routes.js"
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.use(cors({
 }))
 
 app.use("/api/webhooks", webhookRoute)
+app.use("/api/user", userRoute)
 
 app.use(express.json({limit: "16kb"}))
 

@@ -33,6 +33,8 @@ app.use("/api/user", userRoute)
 
 app.use(express.json({limit: "16kb"}))
 
+app.use("/api/images", imageRoute)
+
 
 app.use((err, req, res, next)=>{
   const errorStatus = err.status || 500;

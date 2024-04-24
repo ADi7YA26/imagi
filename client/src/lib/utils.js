@@ -1,3 +1,4 @@
+import { aspectRatioOptions } from "@/constants";
 import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -40,4 +41,14 @@ export const deepMergeObjects = (obj1, obj2) => {
   }
 
   return output;
+};
+
+export const getImageSize = (type, image, dimension) => {
+  if (type === "fill") {
+    return (
+      aspectRatioOptions[image.aspectRatio]?.[dimension] ||
+      1000
+    );
+  }
+  return image?.[dimension] || 1000;
 };

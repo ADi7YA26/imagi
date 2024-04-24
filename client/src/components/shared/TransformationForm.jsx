@@ -5,11 +5,14 @@ import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { aspectRatioOptions, creditFee, defaultValues, transformationTypes } from "@/constants"
 import { CustomField } from "./CustomField"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { Button } from "../ui/button"
 import { debounce, deepMergeObjects } from "@/lib/utils"
 import axios from "axios"
+import MediaUploader from "./MediaUploader"
+import TransformedImage from "./TransformedImage"
+import { InsufficientCreditsModal } from "./InsufficientCredit"
 
 const baseURL = import.meta.env.VITE_BACKEND_API_URI;
 
@@ -46,10 +49,60 @@ const TransformationForm = ({ action, data=null , userId, type, creditBalance, c
     defaultValues: intialValues,
   })
 
-  function onSubmit(values) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+  async function onSubmit(values) {
+    setIsSubmitting(true)
+    
+    if(data || image){
+      const tranformationUrl = getCldImageUrl({
+        width: image?.width, 
+        height: image?.height,
+        src: image?.publicId,
+        ...transformationConfig
+      })
+
+      const imageData = {
+        title: values.title,
+        publicId: image?.publicId,
+        tranformationType: type,
+        width: image?.width,
+        height: image?.height,
+        config: transformationConfig,
+        secureURL: image?.secureURL,
+        tranformationURL: tranformationUrl,
+        aspectRatio: values.aspectRatio,
+        prompt: values.prompt,
+        color: values.color
+      }
+
+      if(action === 'Add'){
+        try {
+          const newImage = await axios.post(`${baseURL}/image`, {
+            image: imageData,
+            userId,
+          })
+
+          if(newImage){
+            form.reset()
+            setImage(data)
+          }
+        } catch (error) {
+            console.log(error)
+        }
+      }
+
+      if(action === 'Update'){
+        try {
+          await axios.put(`${baseURL}/image`, {
+            image: { ...imageData, id: data._id},
+            userId
+          })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
+
+    setIsSubmitting(false)
   }
 
   const onSelectFieldHandler = (value, onChangeField) =>{
@@ -89,15 +142,21 @@ const TransformationForm = ({ action, data=null , userId, type, creditBalance, c
     setNewTransformation(null)
 
     startTransition(async () => {
-      // axios.post(`${baseURL}/users/updateCredit`, {
-      //   userId, creditFee
-      // })
+      axios.post(`${baseURL}/users/updateCredit`, {userId, creditFee})
     })
   }
+
+
+  useEffect(() => {
+    if(image && type==='restor' || type==='removeBackground')
+      setNewTransformation(tranformationType.config)
+  }, [image, tranformationType.config, type])
+  
   
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
         <CustomField 
           control={form.control} 
           name="title" 
@@ -162,6 +221,32 @@ const TransformationForm = ({ action, data=null , userId, type, creditBalance, c
             )}
           </div>
         )}
+
+        <div className="media-uploader-field">
+          <CustomField
+            control={form.control} 
+            name="publicId" 
+            className="flex size-full flex-col" 
+            render={({field}) => 
+              <MediaUploader 
+                onValueChange={field.onChange}
+                setImage={setImage}
+                publicId={field.value}
+                image={image}
+                type={type}
+              />
+            } 
+          />
+
+          <TransformedImage 
+            image={image}
+            type={type}
+            title={form.getValues().title}
+            isTransforming={isTransforming}
+            setIsTransforming={setIsTransforming}
+            transformationConfig={transformationConfig}
+          />
+        </div>
 
         <div className="flex flex-col gap-4">
           <Button type="button" 

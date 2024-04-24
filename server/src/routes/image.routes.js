@@ -3,10 +3,10 @@ import { addImage, updateImage, deleteImage, getImageById, getAllImages, getUser
 
 const router = express.Router()
 
-router.get('/', getAllImages)
 router.post('/', addImage)
 router.put('/', updateImage)
 router.delete('/:imageId', deleteImage)
 router.get('/:imageId', getImageById)
+router.post('/allImage', getAllImages)
 
 export default router

@@ -87,13 +87,13 @@ export const getImageById = async (req, res, next) => {
 // GET IMAGES
 export const getAllImages = async(req, res, next) => {
   try {
-    const { limit = 9, page = 1, searchQuery = '' } = req.query;
+    const { limit = 9, page = 1, searchQuery = '' } = req.body;
 
     let query = {};
 
     if (searchQuery) {
       const { resources } = await cloudinary.search
-        .expression(`folder=imaginify AND ${searchQuery}`)
+        .expression(`folder=imagi AND ${searchQuery}`)
         .execute();
 
       const resourceIds = resources.map((resource) => resource.public_id);

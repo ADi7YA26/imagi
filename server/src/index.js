@@ -5,6 +5,7 @@ import mongoose from "mongoose"
 
 import webhookRoute from "./routes/webhooks.routes.js"
 import userRoute from "./routes/user.routes.js"
+import imageRoute from "./routes/image.routes.js"
 
 const app = express()
 

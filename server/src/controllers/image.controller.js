@@ -78,7 +78,7 @@ export const getImageById = async (req, res, next) => {
 
     if(!image) throw new Error("Image not found");
 
-    return JSON.parse(JSON.stringify(image));
+    res.status(201).json(image);
   } catch (err) {
     next(err)
   }
@@ -121,7 +121,7 @@ export const getAllImages = async(req, res, next) => {
 export const getUserImages = async (req, res, next) => {
   try {
     const {limit = 9,page = 1,userId} = req.body;
-    const skipAmount = (Number(page) - 1) * limit;
+    const skipAmount = (page- 1) * limit;
 
     const images = await populateUser(Image.find({ author: userId }))
       .sort({ updatedAt: -1 })

@@ -11,8 +11,8 @@ export const createUser = async (user) => {
 
 export const getUserById = async (req, res, next) => {
   try {
-    const { userId } = req.params
-    const user = await User.find({clerkId: userId});
+    const { id } = req.params
+    const user = await User.find({clerkId: id});
 
     if (!user) throw new Error("User not found");
 
